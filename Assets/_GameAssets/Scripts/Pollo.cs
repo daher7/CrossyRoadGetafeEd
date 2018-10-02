@@ -2,47 +2,54 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pollo : MonoBehaviour {
-
+public class Pollo : MonoBehaviour
+{
     private Rigidbody rb;
+    [SerializeField] float distanciaDeteccion = 0.1f;
     [SerializeField] int fuerza = 100;
     [SerializeField] Transform posPies;
-
-	void Start () {
-        // Asignamos el rigidbody al objeto
+    // Use this for initialization
+    void Start()
+    {
         rb = GetComponent<Rigidbody>();
-	}
-	
-	void Update () {
+    }
 
-        // Vamos a programar el movimiento del pollo
-        if (Input.GetKeyDown("w"))
+    // Update is called once per frame
+    void Update()
+    {
+        if (Input.GetKeyDown("w") && EstoyEnsuelo())
         {
-            // Saber si los pies están tocando el suelo
-            // Para proyectar una esfera y saber sobre qué objetos choca
-            Collider[] cols = Physics.OverlapSphere(
-                posPies.position, 
-                0.1f,
-                LayerMask.NameToLayer("Terreno"));
-            
-            for(int i = 0; i < cols.Length; i++)
-            {
-                Debug.Log("Estoy tocando con: " + i);
-            }
+            rb.AddForce(new Vector3(0, 1, 0.25f) * fuerza);
+        }
+        else if (Input.GetKeyDown("a") && EstoyEnsuelo())
+        {
+            rb.AddForce(new Vector3(-1, 1, 0) * fuerza);
+        }
+        else if (Input.GetKeyDown("d") && EstoyEnsuelo())
+        {
+            rb.AddForce(new Vector3(1, 1, 0) * fuerza);
+        }
+    }
 
-            rb.AddForce(new Vector3(0, 1, 1) * fuerza); // Lo que queremos es que avance
-        }
-        else if (Input.GetKeyDown("a"))
-        {
-            rb.AddForce(new Vector3(-1, 1, 0) * fuerza); // Lo que queremos es que salte
-        }
-        else if (Input.GetKeyDown("d"))
-        {
-            rb.AddForce(new Vector3(1, 1, 0) * fuerza); // Lo que queremos es que salte
-        }
-        else if (Input.GetKeyDown("s"))
-        {
-            rb.AddForce(new Vector3(0, 1, -1) * fuerza); // Lo que queremos es que salte
-        }
+    private bool EstoyEnsuelo()
+    {
+        int layerIndex = LayerMask.GetMask("Terreno");
+        bool enSuelo = false;
+        //ALTERNATIVA CON CHECKSPHERE
+        enSuelo = Physics.CheckSphere(
+            posPies.position,
+            distanciaDeteccion,
+            layerIndex);
+        Debug.Log("Esto en suelo (CheckSphere)?:" + enSuelo);
+        //ALTERNATIVA CON OVERLAPSPHERE
+        /*
+        Collider[] cols = Physics.OverlapSphere(
+            posPies.position,
+            distanciaDeteccion,
+            layerIndex);
+        if (cols.Length > 0) enSuelo = true;
+        Debug.Log("Estoy en suelo (OveralpSphere)?:" + enSuelo);
+        */
+        return enSuelo;
     }
 }
